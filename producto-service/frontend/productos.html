@@ -262,8 +262,8 @@
 
     async function listarProductos() {
 
-        const respuesta =
-            https://proyectoferre-production.up.railway.app
+       const respuesta =
+    await fetch("https://proyectoferre-production.up.railway.app/productos");
 
         const productos =
             await respuesta.json();
