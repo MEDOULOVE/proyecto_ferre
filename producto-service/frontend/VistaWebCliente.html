@@ -188,7 +188,7 @@
             try {
 
                 const respuesta =
-                    await fetch("http://localhost:8083/productos");
+                   await fetch("https://proyectoferre-production.up.railway.app/productos");
 
                 const productos =
                     await respuesta.json();
@@ -406,7 +406,7 @@
                         cantidad: item.cantidad
                     };
 
-                   await fetch("https://radiant-magic-production-58df.up.railway.app/ventas"), {
+                   await fetch("https://radiant-magic-production-58df.up.railway.app/ventas", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
