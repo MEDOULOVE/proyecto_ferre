@@ -112,6 +112,11 @@
 
     </div>
 <div class="container-fluid">
+    <div class="container mt-3">
+    <div id="valorDolar" class="alert alert-info text-center">
+        💵 Cargando valor del dólar...
+    </div>
+</div>
 
     <div class="position-fixed top-0 end-0 p-3"
          style="width:260px; z-index:1000; margin-top:70px;">
@@ -182,6 +187,22 @@
 
             return "https://images.unsplash.com/photo-1581093458791-9f3c3900df4b";
         }
+
+        async function obtenerDolar() {
+    try {
+        const respuesta = await fetch("https://mindicador.cl/api/dolar");
+        const datos = await respuesta.json();
+
+        const valor = datos.serie[0].valor;
+
+        document.getElementById("valorDolar").innerHTML =
+            "💵 Dólar observado hoy: <strong>$" + valor.toFixed(2) + " CLP</strong>";
+
+    } catch (error) {
+        document.getElementById("valorDolar").innerHTML =
+            "❌ No fue posible obtener el valor del dólar.";
+    }
+}
 
         async function cargarProductos() {
 
