@@ -146,7 +146,7 @@ Eliminar
                 cantidad: parseInt(document.getElementById("cantidad").value)
             };
 
-            const res = await fetch("http://localhost:8081/ventas", {
+          const res = await fetch("https://radiant-magic-production-58df.up.railway.app/ventas", {
                 method: "POST",
                 headers: {"Content-Type":"application/json"},
                 body: JSON.stringify(venta)
@@ -179,7 +179,7 @@ Eliminar
     // ================= ELIMINAR =================
     async function eliminarVenta(id){
 
-        await fetch("http://localhost:8081/ventas/"+id, {
+       await fetch("https://radiant-magic-production-58df.up.railway.app/ventas/" + id, {
             method:"DELETE"
         });
 
