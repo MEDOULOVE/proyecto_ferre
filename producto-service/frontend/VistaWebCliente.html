@@ -1,0 +1,545 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>FERREMAS - Clientes</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        body {
+            background: #f4f6f9;
+            font-family: Arial, sans-serif;
+        }
+
+        .barra-superior {
+            background: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff6b00;
+        }
+
+        .productos {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .card {
+            border-radius: 20px;
+            border: none;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+        }
+
+        .producto-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .precio {
+            font-size: 24px;
+            font-weight: bold;
+            color: green;
+        }
+
+        .codigo {
+            color: gray;
+            font-size: 14px;
+        }
+
+        .carrito-card {
+            width: 220px;
+            border-radius: 15px;
+            padding: 10px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="barra-superior">
+
+    <div class="logo">
+        🛠️ 🏠 FERREMAS
+    </div>
+
+    <div>
+
+        <a href="Usuario.html"
+           id="btnCrear"
+           class="btn btn-warning btn-sm me-2">
+            👤 Crear Cuenta
+        </a>
+
+        <a href="LoginCliente.html"
+           id="btnLogin"
+           class="btn btn-primary btn-sm">
+            🔐 Iniciar Sesión
+        </a>
+
+        <span id="bienvenida"
+              style="display:none; font-weight:bold; margin-left:10px;">
+    </span>
+
+
+    </div>
+    </div>
+
+    </div>
+<div class="container-fluid">
+
+    <div class="position-fixed top-0 end-0 p-3"
+         style="width:260px; z-index:1000; margin-top:70px;">
+
+        <div class="card p-3 carrito-card">
+
+            <h5>🛒 Carrito</h5>
+
+            <ul id="carrito"
+                class="list-group mb-3">
+            </ul>
+
+            <h6 id="totalCarrito">
+                Total: $0
+            </h6>
+
+            <button class="btn btn-success w-100"
+                    onclick="abrirPago()">
+                Pagar
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+
+
+
+    </div>
+
+    <div class="col-md-8">
+
+        <div class="productos"
+             id="productos">
+        </div>
+
+    </div>
+    <script>
+
+
+
+        let carrito =
+            JSON.parse(localStorage.getItem("carrito")) || [];
+
+        mostrarCarrito();
+
+        function obtenerImagen(producto) {
+
+            const nombre = producto.nombre.toLowerCase();
+
+            if (nombre.includes("martillo")) {
+                return "https://images.unsplash.com/photo-1513467655676-561b7d489a88";
+            }
+
+            if (nombre.includes("cemento")) {
+                return "https://images.unsplash.com/photo-1517646287270-a5a9ca602e5c";
+            }
+
+            if (nombre.includes("taladro")) {
+                return "https://images.unsplash.com/photo-1572981779307-38b8cabb2407";
+            }
+
+            if (nombre.includes("pintura")) {
+                return "https://images.unsplash.com/photo-1562259949-e8e7689d7828";
+            }
+
+            return "https://images.unsplash.com/photo-1581093458791-9f3c3900df4b";
+        }
+
+        async function cargarProductos() {
+
+            try {
+
+                const respuesta =
+                    await fetch("http://localhost:8083/productos");
+
+                const productos =
+                    await respuesta.json();
+
+                const contenedor =
+                    document.getElementById("productos");
+
+                contenedor.innerHTML = "";
+
+                productos.forEach(producto => {
+
+                    const imagen = obtenerImagen(producto);
+
+                    contenedor.innerHTML += `
+                <div class="card">
+
+                    <img src="${imagen}" class="producto-img">
+
+                    <div class="p-4">
+
+                        <h3>${producto.nombre}</h3>
+
+                        <p>Código: ${producto.codigoProducto}</p>
+
+                        <p><strong>Marca:</strong> ${producto.marca}</p>
+
+                        <p><strong>Categoría:</strong> ${producto.categoria}</p>
+
+                        <p class="precio">$ ${producto.precio}</p>
+
+                        <button class="btn btn-success w-100"
+                            onclick="agregarCarrito('${producto.nombre}', ${producto.precio})">
+                            🛒 Agregar al carrito
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+                });
+
+            } catch (error) {
+                console.error("Error cargando productos:", error);
+            }
+        }
+
+        // 🔥 IMPORTANTE
+        cargarProductos();
+
+
+
+
+        //////////////////////////////////////////////////////
+        // 🛒 AGREGAR AL CARRITO
+        //////////////////////////////////////////////////////
+
+        function agregarCarrito(nombre, precio) {
+
+            const existente =
+                carrito.find(p => p.nombre === nombre);
+
+            if (existente) {
+
+                existente.cantidad += 1;
+
+            } else {
+
+                carrito.push({
+                    nombre,
+                    precio,
+                    cantidad: 1
+                });
+            }
+
+            localStorage.setItem("carrito", JSON.stringify(carrito));
+            mostrarCarrito();
+        }
+
+        //////////////////////////////////////////////////////
+        // 📦 MOSTRAR CARRITO
+        //////////////////////////////////////////////////////
+
+        function mostrarCarrito() {
+
+            const lista =
+                document.getElementById("carrito");
+
+            const totalTexto =
+                document.getElementById("totalCarrito");
+
+            lista.innerHTML = "";
+
+            let total = 0;
+
+            carrito.forEach((producto, index) => {
+
+                const cantidad =
+                    producto.cantidad || 1;
+
+                const subtotal =
+                    producto.precio * cantidad;
+
+                total += subtotal;
+
+                lista.innerHTML += `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+
+         <span>
+    ${producto.nombre} ($${producto.precio} c/u) x${cantidad} = $${subtotal}
+</span>
+
+            <button class="btn btn-danger btn-sm"
+                onclick="eliminarProductoCarrito(${index})">
+                X
+            </button>
+
+        </li>
+    `;
+            });
+
+            totalTexto.innerText = `Total: $${total}`;
+
+            localStorage.setItem("carrito", JSON.stringify(carrito));
+        }
+
+        //////////////////////////////////////////////////////
+        // ❌ ELIMINAR PRODUCTO
+        //////////////////////////////////////////////////////
+
+        function eliminarProductoCarrito(index) {
+
+            carrito.splice(index, 1);
+
+            localStorage.setItem("carrito", JSON.stringify(carrito));
+
+            mostrarCarrito();
+        }
+
+        //////////////////////////////////////////////////////
+        // 💳 ABRIR PAGO
+        //////////////////////////////////////////////////////
+
+        function abrirPago() {
+
+            if (carrito.length === 0) {
+                alert("⚠️ Agregue productos al carrito");
+                return;
+            }
+
+            const usuario =
+                localStorage.getItem("usuario");
+
+            if (!usuario) {
+
+                const opcion = confirm(
+                    "Debe iniciar sesión para comprar.\n\nAceptar = Iniciar Sesión\nCancelar = Crear Cuenta"
+                );
+
+                if (opcion) {
+                    window.location.href = "LoginCliente.html";
+                } else {
+                    window.location.href = "VistaWebCliente.html";
+                }
+
+                return;
+            }
+
+            const modal =
+                new bootstrap.Modal(
+                    document.getElementById('pagoModal')
+                );
+
+            modal.show();
+        }
+
+        function cerrarSesion() {
+
+            if (confirm("⚠️ ¿Seguro que quieres cerrar sesión?")) {
+
+                localStorage.removeItem("usuario");
+                localStorage.removeItem("carrito");
+
+                window.location.href = "LoginCliente.html";
+            }
+        }
+
+
+
+        //////////////////////////////////////////////////////
+        // 🧾 COMPRAR
+        //////////////////////////////////////////////////////
+        async function comprar() {
+
+            const usuario =
+                JSON.parse(localStorage.getItem("usuario"));
+
+            if (!usuario) {
+                alert("⚠️ Debe iniciar sesión");
+                return;
+            }
+
+            if (carrito.length === 0) {
+                alert("⚠️ Carrito vacío");
+                return;
+            }
+
+            try {
+
+                for (const item of carrito) {
+
+                    const venta = {
+                        cliente: usuario.nombre,
+
+                        productoId: item.nombre,
+                        cantidad: item.cantidad
+                    };
+
+                    await fetch("http://localhost:8081/ventas", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(venta)
+                    });
+                }
+
+                alert("✅ Compra realizada correctamente. Revisa tu correo 📧");
+
+                carrito = [];
+                localStorage.removeItem("carrito");
+
+                mostrarCarrito();
+
+                const modal =
+                    bootstrap.Modal.getInstance(
+                        document.getElementById("pagoModal")
+                    );
+
+                modal.hide();
+
+            } catch (error) {
+                console.error(error);
+                alert("❌ Error en la compra");
+            }
+        }
+
+
+
+    </script>
+
+    <div class="modal fade"
+         id="pagoModal"
+         tabindex="-1">
+
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        Pago FERREMAS
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Método de Pago
+                        </label>
+
+                        <select id="tipoPago"
+                                class="form-select">
+
+                            <option>WebPay</option>
+                            <option>Visa</option>
+                            <option>MasterCard</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Nombre Titular
+                        </label>
+
+                        <input type="text"
+                               id="titular"
+                               class="form-control"
+                               placeholder="Ingrese nombre titular">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Número Tarjeta
+                        </label>
+
+                        <input type="text"
+                               id="tarjeta"
+                               class="form-control"
+                               placeholder="XXXX XXXX XXXX XXXX">
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col">
+                            <input type="text"
+                                   id="fecha"
+                                   class="form-control"
+                                   placeholder="MM/AA">
+                        </div>
+
+                        <div class="col">
+                            <input type="text"
+                                   id="cvv"
+                                   class="form-control"
+                                   placeholder="CVV">
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-success w-100"
+                            onclick="comprar()">
+                        Confirmar Compra
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<button id="btnLogout"
+        class="btn btn-danger btn-sm"
+        onclick="cerrarSesion()"
+        style="display:none;">
+    🔒 Cerrar Sesión
+</button>
+
+</body>
+</html>

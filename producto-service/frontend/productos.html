@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>DOMACO - Productos</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        body {
+            background: #f4f6f9;
+        }
+
+        .contenedor {
+            max-width: 1000px;
+            margin: 40px auto;
+        }
+
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: none;
+        }
+
+       h1, h2, h3 {
+    text-align: center;
+    font-weight: bold;
+    color: black;
+}
+
+        table {
+            margin-top: 20px;
+        }
+
+        thead {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .banner-img {
+            height: 320px;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="contenedor" style="margin-top: 100px;">
+
+    <div id="mensaje"
+         class="alert text-center"
+         style="display: none;">
+    </div>
+    <!-- BANNER -->
+
+    <div class="card p-3 mb-4 text-center">
+
+        <img src="https://images.unsplash.com/photo-1590959651373-a3db0f38a961?q=80&w=1200&auto=format&fit=crop"
+             class="img-fluid rounded mx-auto d-block"
+             style="width: 40%;
+            height: 220px;
+            object-fit: cover;">
+
+        <h2 class="mt-4">
+            Sistema Gestión Productos DOMACO
+        </h2>
+
+        <p class="text-muted">
+            Administración de productos, stock y catálogo
+        </p>
+
+    </div>
+
+    <!-- BOTONES -->
+
+    <div class="d-flex justify-content-center gap-3 mb-4">
+
+        <button class="btn btn-primary px-4"
+                onclick="mostrarFormulario()">
+
+            Guardar Producto
+
+        </button>
+
+        <button class="btn btn-dark px-4"
+                onclick="mostrarProductos()">
+
+            Lista Productos
+
+        </button>
+
+    </div>
+
+    <!-- FORMULARIO -->
+
+    <div class="card p-4"
+         id="formularioProducto"
+         style="display: none;">
+
+        <h1 class="mb-4" id="tituloFormulario">
+            Guardar Producto
+        </h1>
+
+
+        <form id="productoForm">
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Nombre Producto
+                </label>
+
+                <input type="text"
+                       id="nombre"
+                       class="form-control"
+                       placeholder="Ingrese nombre"
+                       required>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Precio
+                </label>
+
+                <input type="number"
+                       id="precio"
+                       class="form-control"
+                       placeholder="Ingrese precio"
+                       required>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Stock
+                </label>
+
+                <input type="number"
+                       id="stock"
+                       class="form-control"
+                       placeholder="Ingrese stock"
+                       required>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Categoría
+                </label>
+
+                <input type="text"
+                       id="categoria"
+                       class="form-control"
+                       placeholder="Ingrese categoría"
+                       required>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Marca
+                </label>
+
+                <input type="text"
+                       id="marca"
+                       class="form-control"
+                       placeholder="Ingrese marca"
+                       required>
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Código Producto
+                </label>
+
+                <input type="text"
+                       id="codigoProducto"
+                       class="form-control"
+                       placeholder="Ingrese código"
+                       required>
+
+            </div>
+
+            <div class="d-flex gap-2">
+
+                <button class="btn btn-primary w-100">
+
+                    Guardar Producto
+
+                </button>
+
+                <button type="button"
+                        class="btn btn-secondary w-100"
+                        onclick="cancelarFormulario()">
+
+                    Cancelar
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- LISTA PRODUCTOS -->
+
+    <div class="card p-4 mt-4"
+         id="contenedorProductos"
+         style="display: none;">
+
+        <h3 class="mb-4">
+            Lista de Productos
+        </h3>
+
+        <table class="table table-bordered table-hover text-center">
+
+            <thead>
+
+            <tr>
+
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Categoría</th>
+                <th>Marca</th>
+                <th>Código</th>
+                <th>Acciones</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody id="tablaProductos"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+    let productoEditando = null;
+
+    async function listarProductos() {
+
+        const respuesta =
+            await fetch("http://localhost:8083/productos");
+
+        const productos =
+            await respuesta.json();
+
+        if (!Array.isArray(productos)) {
+            return;
+        }
+
+        const tabla =
+            document.getElementById("tablaProductos");
+
+        tabla.innerHTML = "";
+
+        productos.forEach(producto => {
+
+            tabla.innerHTML += `
+
+                <tr>
+
+                    <td>${producto.id}</td>
+                    <td>${producto.nombre}</td>
+                    <td>$ ${producto.precio}</td>
+                    <td>${producto.stock}</td>
+                    <td>${producto.categoria}</td>
+                    <td>${producto.marca}</td>
+                    <td>${producto.codigoProducto}</td>
+
+                    <td>
+
+                        <button class="btn btn-warning btn-sm"
+        onclick="editarProducto(${producto.id},
+        '${producto.nombre}',
+        ${producto.precio},
+        ${producto.stock},
+        '${producto.categoria}',
+        '${producto.marca}',
+        '${producto.codigoProducto}')">
+
+    Modificar
+
+</button>
+
+<button class="btn btn-danger btn-sm"
+        onclick="eliminarProducto(${producto.id})">
+
+    Eliminar
+
+</button>
+
+                    </td>
+
+                </tr>
+            `;
+        });
+    }
+
+    document.getElementById("productoForm")
+        .addEventListener("submit", async function (e) {
+
+            e.preventDefault();
+
+            const producto = {
+
+                nombre:
+                    document.getElementById("nombre").value,
+
+                precio:
+                    parseFloat(document.getElementById("precio").value),
+
+                stock:
+                    parseInt(document.getElementById("stock").value),
+
+                categoria:
+                    document.getElementById("categoria").value,
+
+                marca:
+                    document.getElementById("marca").value,
+
+                codigoProducto:
+                    document.getElementById("codigoProducto").value
+            };
+
+            const respuesta =
+                await fetch(
+    productoEditando
+        ? `http://localhost:8083/productos/${productoEditando}`
+        : "http://localhost:8083/productos",
+{
+
+                   method: productoEditando ? "PUT" : "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(producto)
+                });
+
+            const mensaje =
+                document.getElementById("mensaje");
+
+            mensaje.style.display = "block";
+mensaje.scrollIntoView({ behavior: "smooth" });
+
+           if (respuesta.ok) {
+
+    mensaje.className =
+        "alert alert-success text-center";
+
+    mensaje.innerText =
+        "✅ Producto guardado correctamente";
+
+    listarProductos();
+
+    document.getElementById("productoForm").reset();
+
+    productoEditando = null;
+
+} else {
+
+    mensaje.className =
+        "alert alert-danger text-center";
+
+    const error = await respuesta.text();
+
+    mensaje.innerText =
+        "❌ " + error;
+}
+
+setTimeout(() => {
+
+    mensaje.style.display = "none";
+
+}, 3000);
+
+});
+
+        function cancelarFormulario() {
+
+    document.getElementById("productoForm").reset();
+
+    document.getElementById("formularioProducto")
+        .style.display = "none";
+
+    productoEditando = null;
+}
+
+    function mostrarFormulario() {
+
+        const formulario =
+            document.getElementById("formularioProducto");
+
+        if (formulario.style.display === "none") {
+
+            formulario.style.display = "block";
+
+        } else {
+
+            formulario.style.display = "none";
+        }
+    }
+
+   function mostrarProductos() {
+
+    const contenedor =
+        document.getElementById("contenedorProductos");
+
+    const formulario =
+        document.getElementById("formularioProducto");
+
+    formulario.style.display = "none";
+
+    if (contenedor.style.display === "none") {
+
+        contenedor.style.display = "block";
+
+        listarProductos();
+
+    } else {
+
+        contenedor.style.display = "none";
+    }
+}
+
+function editarProducto(id, nombre, precio, stock,
+                         categoria, marca, codigoProducto) {
+
+    productoEditando = id;
+
+    document.getElementById("tituloFormulario")
+       .innerHTML = "<span style='color:black'>Modificar Producto</span>";
+
+    document.getElementById("formularioProducto")
+        .style.display = "block";
+
+    document.getElementById("nombre").value = nombre;
+
+    document.getElementById("precio").value = precio;
+
+    document.getElementById("stock").value = stock;
+
+    document.getElementById("categoria").value = categoria;
+
+    document.getElementById("marca").value = marca;
+
+    document.getElementById("codigoProducto").value = codigoProducto;
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+async function eliminarProducto(id) {
+
+    const respuesta =
+        await fetch(`http://localhost:8083/productos/${id}`, {
+
+            method: "DELETE"
+        });
+
+    const mensaje =
+        document.getElementById("mensaje");
+
+    mensaje.style.display = "block";
+
+    mensaje.scrollIntoView({
+        behavior: "smooth"
+    });
+
+    if (respuesta.ok) {
+
+        mensaje.className =
+            "alert alert-success text-center";
+
+        mensaje.innerText =
+            "✅ Producto eliminado exitosamente";
+
+        listarProductos();
+
+    } else {
+
+        mensaje.className =
+            "alert alert-danger text-center";
+
+        mensaje.innerText =
+            "❌ Error al eliminar producto";
+    }
+
+    setTimeout(() => {
+
+        mensaje.style.display = "none";
+
+    }, 3000);
+}
+
+</script>
+
+</body>
+</html>
