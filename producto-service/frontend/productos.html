@@ -346,11 +346,11 @@
                     document.getElementById("codigoProducto").value
             };
 
-            const respuesta =
-                await fetch(
-    productoEditando
-        ? `http://localhost:8083/productos/${productoEditando}`
-        : "http://localhost:8083/productos",
+     const respuesta =
+    await fetch(
+        productoEditando
+            ? `https://proyectoferre-production.up.railway.app/productos/${productoEditando}`
+            : "https://proyectoferre-production.up.railway.app/productos",
 {
 
                    method: productoEditando ? "PUT" : "POST",
@@ -479,8 +479,8 @@ function editarProducto(id, nombre, precio, stock,
 }
 async function eliminarProducto(id) {
 
-    const respuesta =
-        await fetch(`http://localhost:8083/productos/${id}`, {
+   const respuesta =
+    await fetch(`https://proyectoferre-production.up.railway.app/productos/${id}`, {
 
             method: "DELETE"
         });
