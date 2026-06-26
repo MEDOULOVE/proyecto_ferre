@@ -188,21 +188,30 @@
             return "https://images.unsplash.com/photo-1581093458791-9f3c3900df4b";
         }
 
-        async function obtenerDolar() {
+  async function obtenerDolar() {
     try {
+        console.log("Consultando API...");
+
         const respuesta = await fetch("https://mindicador.cl/api/dolar");
+
+        console.log("Estado:", respuesta.status);
+
         const datos = await respuesta.json();
 
-        const valor = datos.serie[0].valor;
+        console.log(datos);
 
         document.getElementById("valorDolar").innerHTML =
-            "💵 Dólar observado hoy: <strong>$" + valor.toFixed(2) + " CLP</strong>";
+            "💵 Dólar hoy: $" + datos.serie[0].valor;
 
     } catch (error) {
+        console.error(error);
+
         document.getElementById("valorDolar").innerHTML =
-            "❌ No fue posible obtener el valor del dólar.";
+            "❌ Error: " + error.message;
     }
 }
+
+obtenerDolar();
 
         async function cargarProductos() {
 
