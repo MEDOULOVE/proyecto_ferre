@@ -108,7 +108,7 @@
     // ================= LISTAR =================
     async function listarVentas() {
 
-        const res = await fetch("http://localhost:8081/ventas");
+      const res = await fetch("https://radiant-magic-production-58df.up.railway.app/ventas");
         const ventas = await res.json();
 
         const tabla = document.getElementById("tablaVentas");
