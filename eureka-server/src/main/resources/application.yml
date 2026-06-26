@@ -1,0 +1,14 @@
+server:
+  port: ${PORT:8761}
+
+spring:
+  application:
+    name: eureka-server
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  instance:
+    hostname: ${RAILWAY_PUBLIC_DOMAIN}
+    prefer-ip-address: true
